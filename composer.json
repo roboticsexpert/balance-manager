@@ -1,0 +1,29 @@
+{
+    "name": "roboticsexpert/balance-manager",
+    "description": "Add balance (credit) for your users easily",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Roboticsexpert\\BalanceManager\\": "src/",
+            "Roboticsexpert\\BalanceManager\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mahdi Youseftabar",
+            "email": "roboticsexpert@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BalanceManagerServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "ext-decimal": "*",
+        "roboticsexpert/laravel-decimal": "^1.0"
+    }
+}
