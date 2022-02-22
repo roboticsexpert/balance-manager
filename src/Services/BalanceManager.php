@@ -182,13 +182,20 @@ class BalanceManager
      * @param int $userId
      * @param string $currency
      * @param string $reason
-     * @param IBalanceHistoryRelated $model
+     * @param IBalanceHistoryRelated $relatedModel
      * @param Decimal $valueChange
      * @param Decimal $lockedValueChange
      * @return BalanceChangeResult
      * @throws NotEnoughBalanceException|\Throwable
      */
-    public function changeBalanceByUserIdAndCurrency(int $userId, string $currency, string $reason, IBalanceHistoryRelated $model, Decimal $valueChange, Decimal $lockedValueChange): BalanceChangeResult
+    public function changeBalanceByUserIdAndCurrency(
+        int $userId,
+        string $currency,
+        string $reason,
+        IBalanceHistoryRelated $relatedModel,
+        Decimal $valueChange,
+        Decimal $lockedValueChange
+    ): BalanceChangeResult
     {
         $balance = $this->getBalanceByUserIdAndCurrency($userId, $currency);
         $remainingBalance = $balance->value->sub($balance->locked_value);
@@ -198,7 +205,7 @@ class BalanceManager
             throw new NotEnoughBalanceException($currency, $remainingBalance);
         }
         /** @var BalanceChangeResult $balanceChangeResult */
-        $balanceChangeResult = DB::transaction(function () use ($userId, $currency, $valueChange, $reason, $model, $lockedValueChange, $balance) {
+        $balanceChangeResult = DB::transaction(function () use ($userId, $currency, $valueChange, $reason, $relatedModel, $lockedValueChange, $balance) {
 
 
             $query = 'update `balances` set ';
@@ -256,8 +263,8 @@ class BalanceManager
                 $balanceHistory->user_id = $userId;
                 $balanceHistory->change_value = $valueChange;
                 $balanceHistory->reason = $reason;
-                $balanceHistory->related_model_id = $model->getIdentifier();
-                $balanceHistory->related_model_type = $model->getType();
+                $balanceHistory->related_model_id = $relatedModel->getIdentifier();
+                $balanceHistory->related_model_type = $relatedModel->getType();
                 $balanceHistory->value = new Decimal((string)$values->value);
                 $balanceHistory->save();
             }

@@ -13,8 +13,7 @@ class BalanceManagerServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
 
         $this->publishes([
-//            __DIR__ . '/Migrations', database_path('/'),
-            __DIR__ . '/Configs', config_path('/')
+            __DIR__ . '/Configs/'=>config_path('')
         ]);
     }
 

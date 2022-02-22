@@ -1,25 +1,23 @@
 # Laravel Balance manager
 
-//TODO this is test package
+in many projects, you need to have credit (balance) concept for your user that make you distract from your main business logic.
 
+with this package you will have balance for your users easily without being worry about `Race Condition` and `Double Spending`.
 
+this project mainly designed for exchange systems, but you can use it in any project.
 
-bring feature flag functionality to your project simple as possible
-
-if you want to know what feature flag is, check martin fowler topic about it:
-https://martinfowler.com/articles/feature-toggles.html
 
 ## Installation
 
 ```php
-composer require roboticsexpert/feature-flag
+composer require roboticsexpert/balance-manager
 ```
 
 after instaling composer package, if you use auto discovery for service providers, everything ok, but if you blocked
 that just add this line to `config/app.php` in `providers` section:
 
 ```php
-Roboticsexpert\FeatureFlag\LaravelDecimalServiceProvider::class
+Roboticsexpert\BalanceManager\BalanceManagerServiceProvider::class
 ```
 
 after that you should run
@@ -28,90 +26,96 @@ after that you should run
 php artisan migrate
 ```
 
+and this:
+
+```bash 
+php artisan vendor:publish --provider="Roboticsexpert\BalanceManager\BalanceManagerServiceProvider"
+```
+
+it will create `balance.php` file in your config file. 
+ 
+
 ## Usage
+
+First of all, you should decide with currencies you want to have in your system, and consider a KEY for each currency and add those keys in balance.php config file
+
+```php
+return [
+
+    // add symbols of your currencies
+    // symbols must be lower than 16 char
+
+    'currencies'=>[
+        'BTC',
+        'TMN',
+        'DOGE',
+    ]
+];
+```
 
 you can use this project with 2 strategy,Facade or Dependency injection!
 
 I suggest to you to use it with dependecy injection for IDE auto complete feature but use it as you prefer!
 
+after that you can get `BalanceManager` from with these to methods:
 ### Facade
 
-you can get feature flag service like this:
+you can get BalanceManager service like this:
 
 ```php
-use Roboticsexpert\FeatureFlag\FeatureFlagFacade as FeatureFlag;
+use Roboticsexpert\BalanceManager\BalanceManagerFacade as BalanceManager;
 
 
-FeatureFlag::getTypes()
+BalanceManager::getAllBalancesByUserId(1)
 ```
 
-### Dependecy Injection
+### Dependency Injection
 
-you can get feature flag service like this:
+you can get BalanceManager service from `app()` like this:
 
 ```php
-use Roboticsexpert\FeatureFlag\Services\FeatureFlagService;
+use Roboticsexpert\BalanceManager\Services\BalanceManager;
 
-$featureFlag=app(\Roboticsexpert\FeatureFlag\Services\FeatureFlagService::class); //or you can get this service from input of controller method
+$balanceManager=app(BalanceManager::class); 
 
-$featureFlag->getTypes();
+$balanceManager->getAllBalancesByUserId(1);
 ```
+or get from laravel automatic dependency injection
+
+```php
+use Roboticsexpert\BalanceManager\Services\BalanceManager;
+class Controller extends BaseController
+{
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    public function index(BalanceManager $balanceManager){
+        dd($balanceManager->getAllBalancesByUserId(1));
+    }
+}
+
+```
+
 
 ## Methods
 
-### Create Feature flag
-
+### Get all balance for user
+it will return array of `Balance` model
 ```php
-$featureFlagModel=$featureFlagService->createFeatureFlag('FEATURE_NAME');
-dd($featureFlagModel->name);
+$balances= $balanceManager->getAllBalancesByUserId("USER_ID");
+dd($balances);
 ```
 
-### Change type of feature flag (Admin)
+### Change balance of user
 
 ```php
 //OPTIONS: DISABLED , PRIVATE , PUBLIC
-$featureFlagModel=$featureFlagService->changeFeatureFlagType('FEATURE_NAME','DISABLED');
-//or    
-$featureFlagModel=$featureFlagService->changeFeatureFlagType('FEATURE_NAME',\Roboticsexpert\FeatureFlag\Models\FeatureFlag::TYPE_DISABLED);
-```
+$featureFlagModel= $balanceManager->changeBalanceByUserIdAndCurrency(
+        int $userId, //user id
+        string $currency, // like USDT, TMN
+        string $reason, // a unique string for each action
+        IBalanceHistoryRelated $model, // a model that is author of change balance
+        Decimal $valueChange, // value you want to add or sub from user balance
+        Decimal $lockedValueChange // in general usage it should be new \Decimal\Decimal(0)
+);
 
-### Delete feature flag (Admin)
-
-```php
-$featureFlagService->destroyFeatureFlag('FEATURE_1');
-```
-
-### Get all Feature flags (Admin)
-
-```php
-$featureFlags=$featureFlagService->getAllFeatureFlags();
-```
-
-### Attach / Detach  a user to/from a feature flag
-
-```php
-$featureFlagService->attachUserToFeatureFlag(1,'FEATURE_1');
-
-$featureFlagService->detachUserToFeatureFlag(1,'FEATURE_1');
-```
-
-### Get List of not active features for a user or public user
-
-first of all is should explain why you should user disabled features intead of enabled features !
-
-- when a feature became public for all users, we should to tell all clients that the feature is enable until clients be
-  update, but old clients need to have that feature for ever!!!
-- if you return enabled features, your list of features became large and large!
-
-finally i prefred to implement disabled features and you should return this list to client !
-
-```php
-//It will return array of names of features (string)
-//No input for not logged in users
-$featureFlagService->getDisabledFeatureFlagsName();
-
-//User identifier for logged in users
-$featureFlags=$featureFlagService->getDisabledFeatureFlagsName(1);
-```
-    
 
