@@ -1,11 +1,12 @@
 # Laravel Balance manager
 
-in many projects, you need to have credit (balance) concept for your user that make you distract from your main business logic.
+in many projects, you need to have credit (balance) concept for your user that make you distract from your main business
+logic.
 
-with this package you will have balance for your users easily without being worry about `Race Condition` and `Double Spending`.
+with this package you will have balance for your users easily without being worry about `Race Condition`
+and `Double Spending`.
 
 this project mainly designed for exchange systems, but you can use it in any project.
-
 
 ## Installation
 
@@ -32,12 +33,12 @@ and this:
 php artisan vendor:publish --provider="Roboticsexpert\BalanceManager\BalanceManagerServiceProvider"
 ```
 
-it will create `balance.php` file in your config file. 
- 
+it will create `balance.php` file in your config file.
 
 ## Usage
 
-First of all, you should decide with currencies you want to have in your system, and consider a KEY for each currency and add those keys in balance.php config file
+First of all, you should decide with currencies you want to have in your system, and consider a KEY for each currency
+and add those keys in balance.php config file
 
 ```php
 return [
@@ -58,6 +59,7 @@ you can use this project with 2 strategy,Facade or Dependency injection!
 I suggest to you to use it with dependecy injection for IDE auto complete feature but use it as you prefer!
 
 after that you can get `BalanceManager` from with these to methods:
+
 ### Facade
 
 you can get BalanceManager service like this:
@@ -80,6 +82,7 @@ $balanceManager=app(BalanceManager::class);
 
 $balanceManager->getAllBalancesByUserId(1);
 ```
+
 or get from laravel automatic dependency injection
 
 ```php
@@ -95,11 +98,12 @@ class Controller extends BaseController
 
 ```
 
-
 ## Methods
 
 ### Get all balance for user
+
 it will return array of `Balance` model
+
 ```php
 $balances= $balanceManager->getAllBalancesByUserId("USER_ID");
 dd($balances);
@@ -108,8 +112,7 @@ dd($balances);
 ### Change balance of user
 
 ```php
-//OPTIONS: DISABLED , PRIVATE , PUBLIC
-$featureFlagModel= $balanceManager->changeBalanceByUserIdAndCurrency(
+$balanceChangeResult= $balanceManager->changeBalanceByUserIdAndCurrency(
         int $userId, //user id
         string $currency, // like USDT, TMN
         string $reason, // a unique string for each action
