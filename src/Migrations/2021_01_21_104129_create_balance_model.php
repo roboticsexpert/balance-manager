@@ -15,7 +15,7 @@ class CreateBalanceModel extends Migration
     {
         Schema::create('balances', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id');
-            $table->string('currency',4);
+            $table->string('currency');
             $table->unsignedDecimal('value', 32, 16);
             $table->unsignedDecimal('locked_value', 32, 16);
 
